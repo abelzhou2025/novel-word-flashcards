@@ -1,0 +1,5 @@
+{
+  "name": "Novel Word Flashcards",
+  "description": "An application to help users memorize vocabulary from classic novels like 'Jane Eyre' and 'The Count of Monte Cristo'. Users can select a book and difficulty level, then study words using interactive swipeable flashcards.",
+  "requestFramePermissions": []
+}
