@@ -3,7 +3,7 @@ import React, { useMemo } from 'react';
 interface ChapterProps {
   text: string;
   onWordClick: (word: string, event: React.MouseEvent<HTMLSpanElement>) => void;
-  fontSize: string;
+  fontSize: number; // 字号像素值
 }
 
 const Chapter: React.FC<ChapterProps> = ({ text, onWordClick, fontSize }) => {
@@ -25,7 +25,7 @@ const Chapter: React.FC<ChapterProps> = ({ text, onWordClick, fontSize }) => {
   return (
     <div className="space-y-4">
       {paragraphs.map(({ words }, pIndex) => (
-        <p key={pIndex} className={`text-slate-700 dark:text-slate-300 ${fontSize}`}>
+        <p key={pIndex} className="text-slate-700 dark:text-slate-300 leading-relaxed" style={{ fontSize: `${fontSize}px` }}>
           {words.map((word, wIndex) => (
             <span
               key={`${pIndex}-${wIndex}-${word.substring(0, 10)}`}
@@ -45,8 +45,4 @@ const Chapter: React.FC<ChapterProps> = ({ text, onWordClick, fontSize }) => {
   );
 };
 
-// FIX: Removed React.memo wrapper. While a performance optimization, it was
-// preventing the onWordClick prop from being reliably updated on chapter changes,
-// causing the translation feature to fail on subsequent pages. Removing it ensures
-// the component always gets the fresh click handler.
 export default Chapter;

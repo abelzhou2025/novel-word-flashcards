@@ -10,12 +10,9 @@ interface ReaderScreenProps {
 }
 
 const FONT_SIZE_KEY = 'novelvocab-reader-font-size';
-const FONT_SIZES = {
-  sm: 'text-sm',
-  base: 'text-base',
-  lg: 'text-lg',
-};
-type FontSize = keyof typeof FONT_SIZES;
+// 字号范围：14px - 26px，每档 2px
+const FONT_SIZES = [14, 16, 18, 20, 22, 24, 26];
+const DEFAULT_FONT_SIZE_INDEX = 1; // 16px
 
 
 const ReaderScreen: React.FC<ReaderScreenProps> = ({ onBack, setReaderWords }) => {
@@ -27,8 +24,13 @@ const ReaderScreen: React.FC<ReaderScreenProps> = ({ onBack, setReaderWords }) =
   const [isDarkMode, setIsDarkMode] = useState(() => {
     return localStorage.getItem('novel-dark-mode') === 'true' || document.documentElement.classList.contains('dark');
   });
-  const [fontSize, setFontSize] = useState<FontSize>(() => {
-    return (localStorage.getItem(FONT_SIZE_KEY) as FontSize) || 'base';
+  const [fontSize, setFontSize] = useState<number>(() => {
+    const saved = localStorage.getItem(FONT_SIZE_KEY);
+    if (saved) {
+      const parsed = parseInt(saved, 10);
+      if (!isNaN(parsed) && FONT_SIZES.includes(parsed)) return parsed;
+    }
+    return FONT_SIZES[DEFAULT_FONT_SIZE_INDEX];
   });
 
   const tooltipRef = useRef<HTMLDivElement>(null);
@@ -47,7 +49,7 @@ const ReaderScreen: React.FC<ReaderScreenProps> = ({ onBack, setReaderWords }) =
 
   // 字体设置持久化
   useEffect(() => {
-    localStorage.setItem(FONT_SIZE_KEY, fontSize);
+    localStorage.setItem(FONT_SIZE_KEY, fontSize.toString());
   }, [fontSize]);
 
   // 黑夜模式处理
@@ -70,14 +72,17 @@ const ReaderScreen: React.FC<ReaderScreenProps> = ({ onBack, setReaderWords }) =
   useEffect(() => {
     if (!selectedWord) return;
     const handleAction = () => setSelectedWord(null);
+    const container = contentRef.current;
     const timer = setTimeout(() => {
-      window.addEventListener('scroll', handleAction, { passive: true });
-      window.addEventListener('mousemove', handleAction, { once: true });
+      // 监听内部容器的滚动事件
+      container?.addEventListener('scroll', handleAction, { passive: true });
+      // 监听全局触摸移动事件
+      window.addEventListener('touchmove', handleAction, { passive: true });
     }, 100);
     return () => {
       clearTimeout(timer);
-      window.removeEventListener('scroll', handleAction);
-      window.removeEventListener('mousemove', handleAction);
+      container?.removeEventListener('scroll', handleAction);
+      window.removeEventListener('touchmove', handleAction);
     };
   }, [selectedWord]);
 
@@ -249,7 +254,7 @@ const ReaderScreen: React.FC<ReaderScreenProps> = ({ onBack, setReaderWords }) =
         onClick={handleScreenClick}
       >
         <div className={`max-w-xl mx-auto transition-colors duration-300 ${isDarkMode ? 'text-gray-300' : 'text-gray-800'}`}>
-          <Chapter key={currentChapter} text={janeEyreChapters[currentChapter]} onWordClick={handleWordClick} fontSize={FONT_SIZES[fontSize]} />
+          <Chapter key={currentChapter} text={janeEyreChapters[currentChapter]} onWordClick={handleWordClick} fontSize={fontSize} />
         </div>
       </div>
 
@@ -271,16 +276,24 @@ const ReaderScreen: React.FC<ReaderScreenProps> = ({ onBack, setReaderWords }) =
                 <span className="text-lg font-serif">Aa</span>
               </button>
               {showFontSettings && (
-                <div onClick={e => e.stopPropagation()} className="absolute bottom-full left-1/2 -translate-x-1/2 mb-4 w-48 bg-white dark:bg-slate-800 rounded-lg shadow-xl border border-slate-100 dark:border-slate-700 p-3 flex justify-between items-center z-30">
-                  {(Object.keys(FONT_SIZES) as FontSize[]).map(sizeKey => (
-                    <button
-                      key={sizeKey}
-                      onClick={() => setFontSize(sizeKey)}
-                      className={`w-10 h-10 rounded-full flex items-center justify-center transition ${fontSize === sizeKey ? 'bg-indigo-600 text-white shadow-md' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700'}`}
-                    >
-                      <span className={sizeKey === 'sm' ? 'text-xs' : sizeKey === 'lg' ? 'text-xl' : 'text-sm'}>A</span>
-                    </button>
-                  ))}
+                <div onClick={e => e.stopPropagation()} className="absolute bottom-full left-1/2 -translate-x-1/2 mb-4 bg-white dark:bg-slate-800 rounded-lg shadow-xl border border-slate-100 dark:border-slate-700 p-3 flex items-center gap-3 z-30">
+                  <button
+                    onClick={() => setFontSize(prev => Math.max(FONT_SIZES[0], prev - 2))}
+                    disabled={fontSize <= FONT_SIZES[0]}
+                    className="w-8 h-8 rounded-full flex items-center justify-center text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700 disabled:opacity-30"
+                  >
+                    −
+                  </button>
+                  <span className="text-sm font-medium text-slate-700 dark:text-slate-300 min-w-[40px] text-center">
+                    {fontSize}px
+                  </span>
+                  <button
+                    onClick={() => setFontSize(prev => Math.min(FONT_SIZES[FONT_SIZES.length - 1], prev + 2))}
+                    disabled={fontSize >= FONT_SIZES[FONT_SIZES.length - 1]}
+                    className="w-8 h-8 rounded-full flex items-center justify-center text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700 disabled:opacity-30"
+                  >
+                    +
+                  </button>
                 </div>
               )}
             </div>

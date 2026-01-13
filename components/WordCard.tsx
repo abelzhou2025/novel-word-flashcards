@@ -25,6 +25,7 @@ const WordCard: React.FC<WordCardProps> = ({ word, onSwipe, onRevealTranslation,
   const startPosRef = useRef({ x: 0, y: 0 });
   const positionRef = useRef({ x: 0, y: 0 });
   const cardRef = useRef<HTMLDivElement>(null);
+  const isTapRef = useRef(true);  // 用于区分点击和拖拽
 
   const opacity = 1 - Math.abs(position.y) / 250;
 
@@ -130,6 +131,7 @@ const WordCard: React.FC<WordCardProps> = ({ word, onSwipe, onRevealTranslation,
   const handleDragStart = (clientX: number, clientY: number) => {
     if (!isActive) return;
     setIsDragging(true);
+    isTapRef.current = true;  // 假设是点击，移动后变为拖拽
     startPosRef.current = { x: clientX, y: clientY };
     positionRef.current = { x: 0, y: 0 };
     setPosition({ x: 0, y: 0 });
@@ -139,6 +141,10 @@ const WordCard: React.FC<WordCardProps> = ({ word, onSwipe, onRevealTranslation,
     if (!isDragging || !isActive) return;
     const dx = clientX - startPosRef.current.x;
     const dy = clientY - startPosRef.current.y;
+    // 如果移动超过 10px，则认为是拖拽而非点击
+    if (Math.abs(dx) > 10 || Math.abs(dy) > 10) {
+      isTapRef.current = false;
+    }
     positionRef.current = { x: dx, y: dy };
     setPosition({ x: dx, y: dy });
   };
@@ -155,6 +161,11 @@ const WordCard: React.FC<WordCardProps> = ({ word, onSwipe, onRevealTranslation,
     } else {
       positionRef.current = { x: 0, y: 0 };
       setPosition({ x: 0, y: 0 });
+      // 如果是点击（没有移动），则显示译文
+      if (isTapRef.current && !showTranslation) {
+        setShowTranslation(true);
+        onRevealTranslation?.(word);
+      }
     }
   };
 
