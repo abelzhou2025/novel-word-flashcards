@@ -5,7 +5,7 @@ import StudyScreen from './components/StudyScreen';
 import ReviewScreen from './components/ReviewScreen';
 import ReaderScreen from './components/ReaderScreen';
 import ReaderVocabScreen from './components/ReaderVocabScreen';
-import { Vocabulary, Word, DifficultWordEntry } from './types';
+import { VocabularySource, Word, DifficultWordEntry } from './types';
 
 const DIFFICULT_WORDS_KEY = 'novelvocab-difficult-words';
 const READER_WORDS_KEY = 'novelvocab-reader-words';
@@ -14,12 +14,12 @@ const MAX_STUDY_HISTORY = 200;
 
 const App: React.FC = () => {
   const [words, setWords] = useState<Word[] | null>(null);
-  const [currentVocabulary, setCurrentVocabulary] = useState<Vocabulary | null>(null);
+  const [currentVocabulary, setCurrentVocabulary] = useState<VocabularySource | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const [view, setView] = useState<'setup' | 'study' | 'review' | 'review-study' | 'reader' | 'reader-vocab'>('setup');
-  
+
   const [difficultWords, setDifficultWords] = useState<Map<string, DifficultWordEntry>>(() => {
     try {
       const savedWords = window.localStorage.getItem(DIFFICULT_WORDS_KEY);
@@ -84,13 +84,13 @@ const App: React.FC = () => {
     }
   }, [studiedWordIds]);
 
-  const handleStartStudy = useCallback((vocabulary: Vocabulary, generatedWords: Word[]) => {
+  const handleStartStudy = useCallback((vocabulary: VocabularySource, generatedWords: Word[]) => {
     setCurrentVocabulary(vocabulary);
     setWords(generatedWords);
     setIsLoading(false);
     setView('study');
     setSessionKey(prev => prev + 1);
-    
+
     const newWordIds = generatedWords.map(w => w.id);
     setStudiedWordIds(prevIds => {
       const updatedIds = [...newWordIds, ...prevIds.filter(id => !newWordIds.includes(id))];
@@ -108,7 +108,7 @@ const App: React.FC = () => {
   const handleGoToReview = useCallback(() => {
     setView('review');
   }, []);
-  
+
   const handleGoToReader = useCallback(() => {
     setView('reader');
   }, []);
@@ -121,11 +121,11 @@ const App: React.FC = () => {
     setView('review-study');
     setSessionKey(prev => prev + 1);
   }, []);
-  
+
   const handleLoading = (loading: boolean) => {
     setIsLoading(loading);
   };
-  
+
   const handleError = (errorMessage: string) => {
     setError(errorMessage);
     setIsLoading(false);
@@ -149,21 +149,21 @@ const App: React.FC = () => {
 
 
   const renderContent = () => {
-    switch(view) {
+    switch (view) {
       case 'study':
         return (
-          <StudyScreen 
+          <StudyScreen
             key={sessionKey}
-            words={words!} 
-            vocabulary={currentVocabulary!} 
-            onBack={handleGoToSetup} 
+            words={words!}
+            vocabulary={currentVocabulary!}
+            onBack={handleGoToSetup}
             difficultWords={difficultWords}
             setDifficultWords={setDifficultWords}
           />
         );
       case 'review':
         return (
-          <ReviewScreen 
+          <ReviewScreen
             difficultWords={difficultWords}
             onBack={handleGoToSetup}
             onDeleteWord={handleDeleteDifficultWord}
@@ -205,8 +205,8 @@ const App: React.FC = () => {
       case 'setup':
       default:
         return (
-          <SetupScreen 
-            onStart={handleStartStudy} 
+          <SetupScreen
+            onStart={handleStartStudy}
             isLoading={isLoading}
             onLoading={handleLoading}
             onError={handleError}

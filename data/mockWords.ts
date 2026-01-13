@@ -6711,5 +6711,11 @@ export const vocabularyData: VocabularyData = {
     { id: 'cet6-yield', word: 'yield', pronunciation: 'jiːld', translation: '结出(果实)，产生(效果，效益等) 给与，让出 使屈服，使顺从  n. 产量，收益' },
     { id: 'cet6-yoke', word: 'yoke', pronunciation: 'jәuk', translation: '轭，牛轭 束缚 v. 给……上轭 连接，结合，使匹配' },
     { id: 'cet6-zinc', word: 'zinc', pronunciation: 'zɪŋk', translation: '锌' }
-  ]
+  ],
+  [Vocabulary.JUNIOR]: [],
+  [Vocabulary.SENIOR]: [],
+  [Vocabulary.KAOYAN]: [],
+  [Vocabulary.TOEFL]: [],
+  [Vocabulary.SAT]: [],
+  [Vocabulary.CUSTOM]: []
 };

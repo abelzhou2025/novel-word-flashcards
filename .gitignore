@@ -22,3 +22,10 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Data sources
+english-vocabulary-master/
+
+# Python
+__pycache__/
+*.pyc

@@ -23,7 +23,7 @@ const Chapter: React.FC<ChapterProps> = ({ text, onWordClick, fontSize }) => {
   }, [text]);
 
   return (
-    <div className="space-y-4" onClick={(e) => e.stopPropagation()}>
+    <div className="space-y-4">
       {paragraphs.map(({ words }, pIndex) => (
         <p key={pIndex} className={`text-slate-700 dark:text-slate-300 ${fontSize}`}>
           {words.map((word, wIndex) => (
